@@ -3,6 +3,36 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@clerk/nextjs'
 import Link from 'next/link'
+import { Trash2 } from 'lucide-react'
+
+// Optimized Truncation Component with Tooltip
+const TruncatedText = ({ text, limit = 10, className = "" }) => {
+  if (!text) return null;
+
+  // If text fits, just render it
+  if (text.length <= limit) {
+    return <span className={className}>{text}</span>;
+  }
+
+  const truncated = text.slice(0, limit) + "...";
+
+  return (
+    <div className="relative group inline-flex items-center">
+      <span className={`cursor-help decoration-dotted underline-offset-4 ${className}`}>
+        {truncated}
+      </span>
+
+      {/* Tooltip */}
+      <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block z-50">
+        <div className="relative bg-gray-900/95 backdrop-blur-md border border-white/10 text-white text-xs px-3 py-2 rounded-lg shadow-2xl whitespace-nowrap">
+          {text}
+          {/* Arrow */}
+          <div className="absolute left-4 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-gray-900/95"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function MonitorListPage() {
   const { isLoaded, isSignedIn, getToken } = useAuth()
@@ -135,79 +165,96 @@ export default function MonitorListPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black px-4 py-16">
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black px-4 py-8 md:py-16">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-8 flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-white">
+          <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h1 className="text-2xl md:text-3xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
               Monitors
             </h1>
 
             <Link
               href="/post-user"
-              className="rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+              className="w-full sm:w-auto text-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all"
             >
               + Create Monitor
             </Link>
           </div>
 
           {error && (
-            <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-400">
+            <div className="mb-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-red-400">
               {error}
             </div>
           )}
 
           {loading && (
-            <div className="rounded-xl border border-white/10 bg-white/5 p-6 text-gray-400">
-              Loading monitors…
+            <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
+              <div className="inline-block w-6 h-6 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-2" />
+              <p className="text-gray-400 text-sm">Loading monitors...</p>
             </div>
           )}
 
           {!loading && !hasMonitors && (
-            <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center text-gray-400">
-              No monitors created yet.
+            <div className="rounded-xl border border-white/10 bg-white/5 p-12 text-center">
+              <div className="text-gray-500 mb-2">No monitors found</div>
+              <p className="text-sm text-gray-600">Create your first monitor to get started</p>
             </div>
           )}
 
           {!loading && hasMonitors && (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4">
               {monitors.map((monitor) => (
                 <Link
                   key={monitor.id}
                   href={`/monitors/${monitor.id}/checks`}
-                  className="relative block rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 transition hover:border-indigo-400 hover:bg-white/10"
+                  className="group relative block rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 md:p-6 transition-all hover:border-indigo-500/50 hover:bg-white/[0.07] hover:shadow-lg hover:shadow-indigo-500/10"
                 >
-                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div className="min-w-0">
+                  <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+
+                    {/* Monitor Info */}
+                    <div className="min-w-0 flex-1 space-y-2">
+                      {/* Name & Status */}
                       <div className="flex flex-wrap items-center gap-3">
-                        <h2 className="text-lg font-semibold text-white truncate">
-                          {monitor.name}
+                        <h2 className="text-lg font-bold text-white">
+                          <TruncatedText text={monitor.name} limit={20} className="text-white" />
                         </h2>
 
-                        <span className="rounded-full px-3 py-1 text-xs bg-green-500/10 text-green-400 border border-green-500/30">
+                        <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                           Active
                         </span>
                       </div>
 
-                      <p className="mt-1 text-sm text-gray-400 break-all">
-                        {monitor.method} • {monitor.url}
-                      </p>
+                      {/* URL / Domain */}
+                      <div className="flex items-center gap-2 text-sm text-gray-400">
+                        <span className="font-mono text-xs uppercase bg-white/10 px-1.5 py-0.5 rounded text-gray-300">
+                          {monitor.method}
+                        </span>
+                        <span className="text-gray-500">•</span>
+                        {/* STRICT 10 CHAR LIMIT as requested by user */}
+                        <TruncatedText text={monitor.url} limit={10} className="text-gray-300 font-medium hover:text-white transition-colors" />
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
-                      <div className="grid grid-cols-3 gap-4 text-sm text-gray-300">
-                        <div>
-                          <p className="text-gray-500">Interval</p>
-                          <p>{monitor.interval_seconds}s</p>
+                    {/* Meta Stats & Actions */}
+                    <div className="flex items-center justify-between md:justify-end gap-6 pt-4 md:pt-0 border-t md:border-t-0 border-white/5 mt-2 md:mt-0">
+
+                      <div className="grid grid-cols-3 gap-6 text-xs">
+                        <div className="text-center md:text-left">
+                          <p className="text-gray-500 mb-0.5 uppercase tracking-wider font-semibold text-[10px]">Interval</p>
+                          <p className="text-gray-300 font-mono">{monitor.interval_seconds}s</p>
                         </div>
-                        <div>
-                          <p className="text-gray-500">Timeout</p>
-                          <p>{monitor.timeout_seconds}s</p>
+                        <div className="text-center md:text-left">
+                          <p className="text-gray-500 mb-0.5 uppercase tracking-wider font-semibold text-[10px]">Timeout</p>
+                          <p className="text-gray-300 font-mono">{monitor.timeout_seconds}s</p>
                         </div>
-                        <div>
-                          <p className="text-gray-500">Expected</p>
-                          <p>{monitor.expected_status}</p>
+                        <div className="text-center md:text-left">
+                          <p className="text-gray-500 mb-0.5 uppercase tracking-wider font-semibold text-[10px]">Exp.</p>
+                          <p className="text-green-400 font-mono">{monitor.expected_status}</p>
                         </div>
                       </div>
+
+                      {/* Delete Button */}
+                      <div className="h-8 w-px bg-white/10 hidden md:block" />
 
                       <button
                         onClick={(e) => {
@@ -215,9 +262,10 @@ export default function MonitorListPage() {
                           e.stopPropagation()
                           setDeleteTarget(monitor)
                         }}
-                        className="shrink-0 rounded-xl border border-red-500/30 bg-red-500/10 p-2 text-red-400 hover:bg-red-500/20 hover:shadow-[0_0_12px_rgba(239,68,68,0.6)] transition"
+                        className="group/delete shrink-0 relative flex items-center justify-center w-10 h-10 rounded-xl border border-red-500/20 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:border-red-500/40 hover:text-red-300 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] transition-all"
+                        title="Delete Monitor"
                       >
-                        🗑
+                        <Trash2 size={18} className="transition-transform group-hover/delete:scale-110" />
                       </button>
                     </div>
                   </div>
@@ -230,30 +278,30 @@ export default function MonitorListPage() {
 
       {/* DELETE MODAL */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
             onClick={() => !isDeleting && setDeleteTarget(null)}
           />
 
-          <div className="relative z-10 w-full max-w-md rounded-2xl border border-red-500/30 bg-gradient-to-br from-red-500/10 to-black/60 backdrop-blur-xl p-6 text-white shadow-2xl">
-            <h2 className="text-xl font-semibold mb-2">
-              Delete monitor?
-            </h2>
+          <div className="relative z-10 w-full max-w-md rounded-2xl border border-red-500/30 bg-gray-900/90 backdrop-blur-xl p-6 text-white shadow-2xl ring-1 ring-red-500/20 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 mb-4 text-red-400">
+              <div className="p-2 bg-red-500/20 rounded-lg">
+                <Trash2 size={20} />
+              </div>
+              <h2 className="text-xl font-bold text-white">Delete Monitor?</h2>
+            </div>
 
-            <p className="text-sm text-gray-300 mb-6">
-              This will permanently remove{' '}
-              <span className="font-semibold text-white">
-                {deleteTarget.name}
-              </span>{' '}
-              and all its data.
-            </p>
+            <div className="text-sm text-gray-300 mb-6 leading-relaxed">
+              Are you sure you want to delete <span className="font-semibold text-white bg-white/10 px-1.5 py-0.5 rounded"><TruncatedText text={deleteTarget.name} limit={10} /></span>?
+              <br />This action cannot be undone and all historical data will be lost.
+            </div>
 
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
                 disabled={isDeleting}
-                className="rounded-xl border border-white/20 bg-white/5 px-4 py-2 text-sm hover:bg-white/10 transition"
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium hover:bg-white/10 hover:text-white text-gray-300 transition-colors"
               >
                 Cancel
               </button>
@@ -261,9 +309,16 @@ export default function MonitorListPage() {
               <button
                 onClick={confirmDelete}
                 disabled={isDeleting}
-                className="rounded-xl bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-60 transition"
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-600 to-red-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:opacity-90 disabled:opacity-60 transition-all"
               >
-                {isDeleting ? 'Deleting…' : 'Yes, delete'}
+                {isDeleting ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-white/80 border-t-transparent rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Monitor'
+                )}
               </button>
             </div>
           </div>

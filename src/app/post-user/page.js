@@ -107,7 +107,7 @@ export default function CreateMonitorPage() {
       >
         ← Back to Monitors
       </Link> */}
-      <div className="flex justify-end mr-18 mb-10">
+      <div className="flex justify-end mb-10">
         <Link
           href="/monitors"
           className="text-sm text-indigo-400 hover:text-indigo-300 transition"
@@ -120,11 +120,10 @@ export default function CreateMonitorPage() {
         {/* FORM */}
         <div
           className={`rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-2xl p-8 transition-all duration-700
-          ${
-            status !== "idle"
+          ${status !== "idle"
               ? "opacity-0 scale-95 pointer-events-none"
               : "opacity-100 scale-100"
-          }
+            }
         `}
         >
           <h1 className="text-3xl font-bold text-white">Create Monitor</h1>

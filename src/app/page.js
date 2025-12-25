@@ -1,18 +1,15 @@
-import Link from "next/link";
-import React from "react";
+import Hero from "@/components/landing/Hero";
+import Features from "@/components/landing/Features";
+import Footer from "@/components/landing/Footer";
 
-const page = () => {
+export default function LandingPage() {
   return (
-    <div>
-      <h1>Uptime monitor</h1>
-      <Link
-        href="/monitors"
-        className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-      >
-        Monitors
-      </Link>
+    <div className="min-h-screen bg-black text-white selection:bg-indigo-500/30 -mt-20">
+      <main>
+        <Hero />
+        <Features />
+      </main>
+      <Footer />
     </div>
   );
-};
-
-export default page;
+}
