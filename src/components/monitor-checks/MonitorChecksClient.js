@@ -16,29 +16,29 @@ export default function MonitorChecksClient({ id }) {
     // Data State
     const [checks, setChecks] = useState([]);
     // Loading States
-    const [loading, setLoading] = useState(true); 
+    const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
     const [isRefetching, setIsRefetching] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState("Loading data...");
-    
+
     const [error, setError] = useState(null);
     const [showTable, setShowTable] = useState(false);
     const [hoveredPoint, setHoveredPoint] = useState(null);
 
     // Filters & Mode
-    const [timeRange, setTimeRange] = useState("24h");
+    const [timeRange, setTimeRange] = useState("15m");
     const [liveTail, setLiveTail] = useState(true);
 
     // Pagination State
     const [nextCursor, setNextCursor] = useState(null);
 
     // Safety Limit for auto-fetching
-    const MAX_AUTO_FETCH = 2000; 
+    const MAX_AUTO_FETCH = 2000;
 
     // Helper: Calculate 'from' date based on timeRange
     const getFromDateData = useCallback((range) => {
         if (range === "custom") return null;
-        
+
         const now = new Date();
         const rangeMap = {
             "15m": 15 * 60 * 1000,
@@ -50,7 +50,7 @@ export default function MonitorChecksClient({ id }) {
         };
         const ms = rangeMap[range];
         if (!ms) return null;
-        
+
         return new Date(now.getTime() - ms);
     }, []);
 
@@ -58,8 +58,8 @@ export default function MonitorChecksClient({ id }) {
     // Core Fetch Function (Single Page)
     const fetchPage = useCallback(async (cursor, fromDate) => {
         // Pass 'from' to API to potentially optimize, but we mainly check client side loop
-         const fromIso = fromDate ? fromDate.toISOString() : null;
-         return await getMonitorChecks(id, cursor, fromIso);
+        const fromIso = fromDate ? fromDate.toISOString() : null;
+        return await getMonitorChecks(id, cursor, fromIso);
     }, [id]);
 
     // Recursive / Deep Fetch Logic
@@ -69,11 +69,11 @@ export default function MonitorChecksClient({ id }) {
         setLoading(true);
         setLoadingMessage("Initializing timeline...");
         setError(null);
-        
+
         try {
             const targetDate = getFromDateData(range); // Date obj or null
             const targetTime = targetDate ? targetDate.getTime() : 0;
-            
+
             let accumulatedChecks = [];
             let currentCursor = null;
             let keepFetching = true;
@@ -83,13 +83,13 @@ export default function MonitorChecksClient({ id }) {
             while (keepFetching) {
                 fetchCount++;
                 if (fetchCount > 1 && targetDate) {
-                     setLoadingMessage(`Retrieving history... Page ${fetchCount} (${accumulatedChecks.length} logs)`);
+                    setLoadingMessage(`Retrieving history... Page ${fetchCount} (${accumulatedChecks.length} logs)`);
                 }
 
                 const result = await fetchPage(currentCursor, targetDate);
-                
+
                 if (result.error) throw new Error(result.error);
-                
+
                 const pageData = result.data || [];
                 if (pageData.length === 0) {
                     keepFetching = false;
@@ -127,16 +127,16 @@ export default function MonitorChecksClient({ id }) {
                 } else {
                     // If no target time (custom/all?), fetch only page 1 usually? 
                     // Or if "Range" logic is invoked generally:
-                    if (range === "24") { 
+                    if (range === "24") {
                         // Default simple logic, maybe loop a bit or just one page? 
                         // Logic moved to: "If range is specific, loop until range covered"
                     } else {
-                         // Default safety: just 1 page if we don't know the range logic
-                         currentCursor = result.nextCursor;
-                         keepFetching = false;
+                        // Default safety: just 1 page if we don't know the range logic
+                        currentCursor = result.nextCursor;
+                        keepFetching = false;
                     }
                 }
-                
+
                 // Prepare next iteration
                 currentCursor = result.nextCursor;
             }
@@ -147,10 +147,10 @@ export default function MonitorChecksClient({ id }) {
             accumulatedChecks.forEach(c => uniqueMap.set(c.id, c));
             const finalSorted = Array.from(uniqueMap.values())
                 .sort((a, b) => new Date(b.checked_at) - new Date(a.checked_at));
-            
+
             setChecks(finalSorted);
             setNextCursor(currentCursor);
-            
+
             // Re-enable Live Tail if appropriate
             setLiveTail(true);
 
@@ -170,19 +170,19 @@ export default function MonitorChecksClient({ id }) {
         setLoadingMore(true);
         setLiveTail(false);
         setTimeRange("custom"); // Switch mode
-        
+
         try {
             const result = await fetchPage(nextCursor, null); // No 'from' constraint on load more
             if (result.error) throw new Error(result.error);
-            
+
             const newData = result.data || [];
-            
+
             setChecks(prev => {
                 const map = new Map(prev.map(c => [c.id, c]));
                 newData.forEach(c => map.set(c.id, c));
                 return Array.from(map.values()).sort((a, b) => new Date(b.checked_at) - new Date(a.checked_at));
             });
-            
+
             setNextCursor(result.nextCursor || null);
         } catch (err) {
             setError(err.message);
@@ -196,17 +196,17 @@ export default function MonitorChecksClient({ id }) {
         if (!liveTail) return;
         // Just fetch latest page/partial
         try {
-             // We don't want to use 'fetchPage' recursively here. Just simple latest check.
-             // We also don't want 'from' constraint to hide new stuff? 
-             // Actually, API 'from' usually filters OUT older. 
-             const result = await getMonitorChecks(id, null, null); 
-             if (result.data) {
-                 setChecks(prev => {
-                     const map = new Map(prev.map(c => [c.id, c]));
-                     result.data.forEach(c => map.set(c.id, c));
-                     return Array.from(map.values()).sort((a, b) => new Date(b.checked_at) - new Date(a.checked_at));
-                 });
-             }
+            // We don't want to use 'fetchPage' recursively here. Just simple latest check.
+            // We also don't want 'from' constraint to hide new stuff? 
+            // Actually, API 'from' usually filters OUT older. 
+            const result = await getMonitorChecks(id, null, null);
+            if (result.data) {
+                setChecks(prev => {
+                    const map = new Map(prev.map(c => [c.id, c]));
+                    result.data.forEach(c => map.set(c.id, c));
+                    return Array.from(map.values()).sort((a, b) => new Date(b.checked_at) - new Date(a.checked_at));
+                });
+            }
         } catch (e) { console.error("Live tail error", e); }
     }, [id, liveTail]);
 
@@ -214,7 +214,7 @@ export default function MonitorChecksClient({ id }) {
     // Effect: Initial Load & Range Change
     useEffect(() => {
         if (timeRange === "custom") return; // Don't auto-load on custom switch
-        
+
         loadDataForRange(timeRange);
     }, [timeRange, loadDataForRange]);
 
@@ -232,12 +232,12 @@ export default function MonitorChecksClient({ id }) {
 
         const targetDate = getFromDateData(timeRange);
         if (!targetDate) return checks;
-        
+
         const cutoff = targetDate.getTime();
         return checks.filter(c => new Date(c.checked_at).getTime() >= cutoff);
     }, [checks, timeRange, getFromDateData]);
 
-    
+
     /* Metrics Logic using displayChecks */
     const percentiles = useMemo(() => {
         if (!displayChecks.length) return null;
@@ -285,14 +285,14 @@ export default function MonitorChecksClient({ id }) {
                 <div className="relative min-h-[300px] rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
                     {/* Centered Spinner Overlay */}
                     {(loading || isRefetching) && (
-                         <div className="absolute inset-0 z-30 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm rounded-2xl">
+                        <div className="absolute inset-0 z-30 flex items-center justify-center bg-gray-950/60 backdrop-blur-sm rounded-2xl">
                             <div className="flex flex-col items-center gap-3 bg-black/40 p-6 rounded-xl border border-white/10 backdrop-blur-md">
                                 <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
                                 <span className="text-sm font-medium text-indigo-200">{loadingMessage}</span>
                             </div>
                         </div>
                     )}
-                    
+
                     <div className="p-4 md:p-6 h-full">
                         <ResponseTimeline
                             loading={false}
@@ -322,10 +322,10 @@ export default function MonitorChecksClient({ id }) {
                         <button
                             onClick={handleLoadMore}
                             disabled={loadingMore}
-                            className="px-6 py-3 rounded-xl border border-white/10 bg-white/5 text-gray-300 font-medium hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 flex items-center gap-2"
+                            className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-gray-300 font-medium hover:bg-white/10 hover:text-white transition-all disabled:opacity-50 flex items-center gap-2"
                         >
                             {loadingMore && <div className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin" />}
-                            {loadingMore ? "Loading history..." : "Load Older Logs"}
+                                {loadingMore ? "Loading history..." : "Load Older Logs"}
                         </button>
                     </div>
                 )}
