@@ -6,6 +6,7 @@ import Link from "next/link";
 import MonitorItem from "@/components/monitors/MonitorItem";
 import EditMonitorModal from "@/components/monitors/EditMonitorModal";
 import DeleteMonitorModal from "@/components/monitors/DeleteMonitorModal";
+import IncidentsDrawer from "@/components/monitors/IncidentsDrawer";
 
 export default function MonitorListPage() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -19,6 +20,8 @@ export default function MonitorListPage() {
 
   const [updateTarget, setUpdateTarget] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const [incidentsTarget, setIncidentsTarget] = useState(null);
 
   // FETCH MONITORS
   useEffect(() => {
@@ -176,18 +179,53 @@ export default function MonitorListPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black px-4 py-8 md:py-16">
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black px-4 pt-24 pb-16">
         <div className="mx-auto max-w-5xl">
           <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-              Monitors
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl md:text-3xl font-bold text-white bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                Monitors
+              </h1>
 
-            <Link
+              { /* Purple dot */}
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75"></span>
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-500"></span>
+              </span>
+            </div>
+
+            {/* <Link
               href="/post-user"
               className="w-full sm:w-auto text-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 hover:scale-[1.02] transition-all"
             >
               + Create Monitor
+            </Link> */}
+
+            <Link
+              href="/post-user"
+              aria-label="Create new monitor"
+              className="group relative inline-flex items-center gap-2
+             rounded-xl px-5 py-2.5
+             text-sm font-medium text-white
+             bg-blue-500/10 backdrop-blur-md
+             border border-white/10
+             shadow-lg shadow-blue-500/20
+             transition-all duration-300
+             hover:shadow-purple-500/30"
+            >
+              {/* Inner purple border on hover */}
+              <span
+                className="pointer-events-none absolute inset-0 rounded-xl
+               ring-1 ring-transparent
+               transition-all duration-300
+               group-hover:ring-purple-400/60"
+              />
+
+              {/* + icon */}
+              <span className="relative z-10 text-base leading-none">+</span>
+
+              {/* Text */}
+              <span className="relative z-10">New</span>
             </Link>
           </div>
 
@@ -222,6 +260,7 @@ export default function MonitorListPage() {
                   onEdit={setUpdateTarget}
                   onDelete={setDeleteTarget}
                   onEnable={handleEnable}
+                  onIncidents={setIncidentsTarget}
                 />
               ))}
             </div>
@@ -242,6 +281,11 @@ export default function MonitorListPage() {
         onClose={() => setDeleteTarget(null)}
         onDelete={handleDelete}
         isDeleting={isDeleting}
+      />
+
+      <IncidentsDrawer
+        monitor={incidentsTarget}
+        onClose={() => setIncidentsTarget(null)}
       />
     </>
   );
