@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function MonitorHeader() {
   return (
@@ -9,9 +10,10 @@ export default function MonitorHeader() {
 
       <Link
         href="/monitors"
-        className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+        className="group flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 hover:text-white transition-all rounded-full border border-transparent hover:border-white/10 hover:bg-white/5"
       >
-        ← Back to Monitors
+        <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
+        Back to Monitors
       </Link>
     </div>
   );

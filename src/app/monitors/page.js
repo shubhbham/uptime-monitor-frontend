@@ -179,7 +179,7 @@ export default function MonitorListPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black px-4 pt-24 pb-16">
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black px-4 pt-16 pb-16">
         <div className="mx-auto max-w-5xl">
           <div className="mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
