@@ -31,18 +31,17 @@ export default function CreateMonitorPage() {
   useEffect(() => {
     if (status !== "error") return;
 
+    if (countdown <= 0) {
+      router.push("/monitors");
+      return;
+    }
+
     const timer = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          clearInterval(timer);
-          router.push("/monitors");
-        }
-        return c - 1;
-      });
+      setCountdown((c) => c - 1);
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [status, router]);
+  }, [status, countdown, router]);
 
   const createMonitor = async () => {
     setLoading(true);
