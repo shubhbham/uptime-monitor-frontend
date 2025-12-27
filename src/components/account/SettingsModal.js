@@ -2,8 +2,46 @@
 
 import { useState, useEffect } from "react";
 import { useAuth, useUser } from "@clerk/nextjs";
-import { X, AlertTriangle, Trash2, User, Mail, Calendar } from "lucide-react";
+import { X, AlertTriangle, Trash2, User, Mail, Calendar, Activity, Key } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+const scrollbarStyles = `
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.15);
+    }
+    .status-dot {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        margin-right: 6px;
+        animation: blink 2s infinite;
+    }
+    @keyframes blink {
+        0%, 49%, 100% {
+            opacity: 1;
+        }
+        50%, 99% {
+            opacity: 0.4;
+        }
+    }
+    .active-badge {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        backdrop-filter: blur(10px);
+    }
+`;
 
 export default function SettingsModal({ onClose }) {
     const { getToken, signOut } = useAuth();
@@ -24,15 +62,12 @@ export default function SettingsModal({ onClose }) {
         const fetchProfile = async () => {
             try {
                 const token = await getToken();
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/me`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/auth/stats`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    // API returns an array, take the first item
-                    if (Array.isArray(data) && data.length > 0) {
-                        setProfile(data[0]);
-                    }
+                    setProfile(data);
                 }
             } catch (err) {
                 console.error("Failed to fetch profile", err);
@@ -74,6 +109,7 @@ export default function SettingsModal({ onClose }) {
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <style>{scrollbarStyles}</style>
             <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose} />
 
             <div className="relative z-10 w-full max-w-2xl bg-gray-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col md:flex-row h-[450px]">
@@ -109,7 +145,7 @@ export default function SettingsModal({ onClose }) {
                     </div>
 
                     {/* Scrollable Body */}
-                    <div className="flex-1 overflow-y-auto p-8">
+                    <div className="custom-scrollbar flex-1 overflow-y-auto p-8">
 
                         {activeTab === "general" && (
                             <div className="space-y-8">
@@ -125,8 +161,14 @@ export default function SettingsModal({ onClose }) {
                                             )}
                                         </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <h3 className="text-2xl font-bold text-white">{profile?.name || user?.fullName || "User"}</h3>
+                                    <div className="flex-1 space-y-3">
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                            <h3 className="text-2xl font-bold text-white">{profile?.name || user?.fullName || "User"}</h3>
+                                            <span className="active-badge inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider text-emerald-300">
+                                                <span className="status-dot"></span>
+                                                Active
+                                            </span>
+                                        </div>
                                         <div className="flex items-center gap-2 text-gray-400 text-sm">
                                             <Mail size={14} />
                                             <span>{profile?.email || user?.primaryEmailAddress?.emailAddress}</span>
@@ -134,6 +176,42 @@ export default function SettingsModal({ onClose }) {
                                         <div className="flex items-center gap-2 text-gray-500 text-xs mt-1">
                                             <Calendar size={12} />
                                             <span>Joined {formatDate(profile?.created_at || user?.createdAt)}</span>
+                                        </div>
+                                        <div className="flex gap-4 pt-2">
+                                            <div className="flex items-center gap-2">
+                                                <Activity size={14} className="text-indigo-400" />
+                                                <span className="text-xs text-gray-400">{profile?.active_monitors || 0} active <span className="text-gray-500">monitors</span></span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Key size={14} className="text-purple-400" />
+                                                <span className="text-xs text-gray-400">{profile?.active_api_keys || 0} active <span className="text-gray-500">keys</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Usage Statistics */}
+                                <div className="border-t border-white/10 pt-8">
+                                    <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">Usage</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {/* Monitors */}
+                                        <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Monitors</span>
+                                                <Activity size={16} className="text-indigo-400" />
+                                            </div>
+                                            <div className="text-2xl font-bold text-white">{profile?.active_monitors || 0}</div>
+                                            <div className="text-xs text-gray-500 mt-1">of {profile?.total_monitors || 0} total</div>
+                                        </div>
+
+                                        {/* API Keys */}
+                                        <div className="rounded-lg border border-white/10 bg-white/5 p-4">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">API Keys</span>
+                                                <Key size={16} className="text-purple-400" />
+                                            </div>
+                                            <div className="text-2xl font-bold text-white">{profile?.active_api_keys || 0}</div>
+                                            <div className="text-xs text-gray-500 mt-1">of {profile?.total_api_keys || 0} total</div>
                                         </div>
                                     </div>
                                 </div>
