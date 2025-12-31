@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth, UserButton, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { ArrowRight, LayoutDashboard, Key, Menu, X, Activity } from "lucide-react";
+import { ArrowRight, LayoutDashboard, Key, Menu, X, Activity, AlertTriangle } from "lucide-react";
 
 export default function Navbar() {
     const { isSignedIn, isLoaded } = useAuth();
@@ -36,6 +36,10 @@ export default function Navbar() {
                             <div className="h-4 w-px bg-white/10" />
                             <Link href="/monitors" className="flex items-center gap-1.5 hover:text-white transition-colors">
                                 <Activity size={14} /> Monitors
+                            </Link>
+                            <Link href="/incidents" className="flex items-center gap-1.5 hover:text-white transition-colors group">
+                                <AlertTriangle size={14} className="text-red-500 group-hover:text-red-400" />
+                                <span className="group-hover:text-red-200">Incidents</span>
                             </Link>
                             <Link href="/print-token" className="flex items-center gap-1.5 hover:text-white transition-colors">
                                 <Key size={14} /> API
@@ -98,6 +102,9 @@ export default function Navbar() {
                                 <hr className="border-white/5" />
                                 <Link href="/monitors" onClick={toggleMenu} className="p-2 hover:bg-white/5 rounded-lg flex items-center gap-2">
                                     <Activity size={16} /> Monitors Dashboard
+                                </Link>
+                                <Link href="/incidents" onClick={toggleMenu} className="p-2 hover:bg-white/5 rounded-lg flex items-center gap-2">
+                                    <AlertTriangle size={16} className="text-red-500" /> Incidents
                                 </Link>
                                 <Link href="/print-token" onClick={toggleMenu} className="p-2 hover:bg-white/5 rounded-lg flex items-center gap-2">
                                     <Key size={16} /> API Access

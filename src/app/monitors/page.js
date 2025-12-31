@@ -7,8 +7,9 @@ import { Settings } from "lucide-react";
 import MonitorItem from "@/components/monitors/MonitorItem";
 import EditMonitorModal from "@/components/monitors/EditMonitorModal";
 import DeleteMonitorModal from "@/components/monitors/DeleteMonitorModal";
-import IncidentsDrawer from "@/components/monitors/IncidentsDrawer";
+
 import SettingsModal from "@/components/account/SettingsModal";
+import { AlertTriangle } from "lucide-react";
 
 export default function MonitorListPage() {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -23,7 +24,7 @@ export default function MonitorListPage() {
   const [updateTarget, setUpdateTarget] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const [incidentsTarget, setIncidentsTarget] = useState(null);
+
 
   const [showSettings, setShowSettings] = useState(false);
 
@@ -205,6 +206,14 @@ export default function MonitorListPage() {
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto">
+              <Link
+                href="/incidents"
+                className="flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all w-full sm:w-auto"
+              >
+                <AlertTriangle size={16} className="text-red-500" />
+                Incidents
+              </Link>
+
               <button
                 onClick={() => setShowSettings(true)}
                 className="flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-all w-full sm:w-auto"
@@ -273,7 +282,6 @@ export default function MonitorListPage() {
                   onEdit={setUpdateTarget}
                   onDelete={setDeleteTarget}
                   onEnable={handleEnable}
-                  onIncidents={setIncidentsTarget}
                 />
               ))}
             </div>
@@ -296,11 +304,6 @@ export default function MonitorListPage() {
         onClose={() => setDeleteTarget(null)}
         onDelete={handleDelete}
         isDeleting={isDeleting}
-      />
-
-      <IncidentsDrawer
-        monitor={incidentsTarget}
-        onClose={() => setIncidentsTarget(null)}
       />
     </>
   );

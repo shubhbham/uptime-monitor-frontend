@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Trash2, Pencil, Play, Loader2, History } from "lucide-react";
+import { Trash2, Pencil, Play, Loader2 } from "lucide-react";
 
 const TruncatedText = ({ text, limit = 10, className = "" }) => {
     if (!text) return null;
@@ -143,23 +143,6 @@ export default function MonitorItem({ monitor, onEdit, onDelete, onEnable, onInc
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onIncidents(monitor);
-                                }}
-                                className={`group/history relative flex items-center justify-center w-8 h-8 rounded-lg border transition-all mr-1 ${
-                                    hasOngoingIncident
-                                    ? "border-red-500/50 bg-red-500/20 text-red-500 animate-shake-alert shadow-[0_0_10px_rgba(239,68,68,0.4)]"
-                                    : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/40 hover:text-emerald-300"
-                                }`}
-                                title={hasOngoingIncident ? "Ongoing Incident!" : "View Incidents"}
-                            >
-                                <History size={14} className={hasOngoingIncident ? "animate-pulse" : ""} />
-                            </button>
-
-                            <div className="mx-1 h-4 w-px bg-white/10"></div>
-
-                            <button
-                                onClick={(e) => {
-                                    e.stopPropagation();
                                     onEdit(monitor);
                                 }}
                                 className="group/edit relative flex items-center justify-center w-8 h-8 rounded-lg border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 hover:border-indigo-500/40 hover:text-indigo-300 transition-all"
@@ -167,6 +150,8 @@ export default function MonitorItem({ monitor, onEdit, onDelete, onEnable, onInc
                             >
                                 <Pencil size={14} />
                             </button>
+
+                            <span className="text-gray-700 mx-1">|</span>
 
                             <button
                                 onClick={(e) => {
