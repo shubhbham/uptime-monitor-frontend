@@ -101,8 +101,14 @@ export default function MonitorListPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            name: monitorData.name,
+            url: monitorData.url,
+            method: monitorData.method,
+            expected_status: monitorData.expected_status,
             interval_seconds: monitorData.interval_seconds,
+            timeout_seconds: monitorData.timeout_seconds,
             is_active: monitorData.is_active,
+            notify: monitorData.notify,
           }),
         }
       );
